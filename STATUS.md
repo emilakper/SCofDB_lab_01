@@ -19,28 +19,28 @@
 ### 1. Доменный слой (`backend/app/domain/`)
 
 **user.py**
-- [ ] Класс User
-- [ ] Валидация email
+- [x] Класс User
+- [x] Валидация email
 
 **order.py**
-- [ ] Enum OrderStatus
-- [ ] Класс OrderItem
-- [ ] Класс OrderStatusChange
-- [ ] Класс Order с методами
+- [x] Enum OrderStatus
+- [x] Класс OrderItem
+- [x] Класс OrderStatusChange
+- [x] Класс Order с методами
 
 ### 2. Репозитории (`backend/app/infrastructure/repositories.py`)
 
 **UserRepository**
-- [ ] save()
-- [ ] find_by_id()
-- [ ] find_by_email()
-- [ ] find_all()
+- [x] save()
+- [x] find_by_id()
+- [x] find_by_email()
+- [x] find_all()
 
 **OrderRepository**
-- [ ] save()
-- [ ] find_by_id()
-- [ ] find_by_user()
-- [ ] find_all()
+- [x] save()
+- [x] find_by_id()
+- [x] find_by_user()
+- [x] find_all()
 
 ### 3. Сервисы (`backend/app/application/`)
 
