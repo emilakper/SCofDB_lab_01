@@ -56,7 +56,6 @@ class UserRepository:
         if not row:
             return None
         
-        # Используем object.__new__ чтобы избежать валидации при загрузке из БД
         user = object.__new__(User)
         user.id = row[0]
         user.email = row[1]
@@ -119,16 +118,10 @@ class OrderRepository:
         async with self.session.begin_nested():
 
             order_query = text("""
-                INSERT INTO orders (id, user_id, created_at, status_id, total_amount)
-                VALUES (
-                    :id, 
-                    :user_id, 
-                    :created_at, 
-                    (SELECT id FROM order_statuses WHERE name = :status),
-                    :total_amount
-                )
+                INSERT INTO orders (id, user_id, created_at, status, total_amount)
+                VALUES (:id, :user_id, :created_at, :status, :total_amount)
                 ON CONFLICT (id) DO UPDATE SET
-                    status_id = (SELECT id FROM order_statuses WHERE name = EXCLUDED.status_id),
+                    status = EXCLUDED.status,
                     total_amount = EXCLUDED.total_amount
                 RETURNING id
             """)
@@ -174,13 +167,8 @@ class OrderRepository:
                 
                 for history in order.status_history:
                     history_query = text("""
-                        INSERT INTO order_status_history (id, order_id, status_id, changed_at)
-                        VALUES (
-                            :id, 
-                            :order_id, 
-                            (SELECT id FROM order_statuses WHERE name = :status),
-                            :changed_at
-                        )
+                        INSERT INTO order_status_history (id, order_id, status, changed_at)
+                        VALUES (:id, :order_id, :status, :changed_at)
                     """)
                     await self.session.execute(
                         history_query,
@@ -200,14 +188,13 @@ class OrderRepository:
     async def find_by_id(self, order_id: uuid.UUID) -> Optional[Order]:
         order_query = text("""
             SELECT 
-                o.id,
-                o.user_id,
-                o.created_at,
-                os.name as status,
-                o.total_amount
-            FROM orders o
-            JOIN order_statuses os ON o.status_id = os.id
-            WHERE o.id = :order_id
+                id,
+                user_id,
+                created_at,
+                status,  # Прямое значение статуса
+                total_amount
+            FROM orders
+            WHERE id = :order_id
         """)
         
         order_result = await self.session.execute(order_query, {"order_id": order_id})
@@ -243,13 +230,12 @@ class OrderRepository:
 
         history_query = text("""
             SELECT 
-                osh.id,
-                os.name as status,
-                osh.changed_at
-            FROM order_status_history osh
-            JOIN order_statuses os ON osh.status_id = os.id
-            WHERE osh.order_id = :order_id
-            ORDER BY osh.changed_at ASC
+                id,
+                status,
+                changed_at
+            FROM order_status_history
+            WHERE order_id = :order_id
+            ORDER BY changed_at ASC
         """)
         
         history_result = await self.session.execute(history_query, {"order_id": order_id})
