@@ -18,11 +18,11 @@ from .exceptions import (
 # TODO: Реализовать OrderStatus (str, Enum)
 # Значения: CREATED, PAID, CANCELLED, SHIPPED, COMPLETED
 class OrderStatus(str, Enum):
-    CREATED = "CREATED"
-    PAID = "PAID"
-    CANCELLED = "CANCELLED"
-    SHIPPED = "SHIPPED"
-    COMPLETED = "COMPLETED"
+    CREATED = "created"
+    PAID = "paid"
+    CANCELLED = "cancelled"
+    SHIPPED = "shipped"
+    COMPLETED = "completed"
 
 
 # TODO: Реализовать OrderItem (dataclass)
@@ -35,7 +35,7 @@ class OrderItem:
     price: Decimal
     quantity: int
     id: Optional[uuid.UUID] = None
-    order_id: Optional[uuid.UUID] = None
+    id: Optional[uuid.UUID] = field(default_factory=uuid.uuid4)
 
     def __post_init__(self):
         if self.quantity <= 0:

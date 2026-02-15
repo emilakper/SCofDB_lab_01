@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS order_statuses (
 -- TODO: Вставить значения статусов
 -- created, paid, cancelled, shipped, completed
 INSERT INTO order_statuses (status, description) VALUES
-    ('CREATED', 'Order created'),
-    ('PAID', 'Order paid'),
-    ('CANCELLED', 'Order cancelled'),
-    ('SHIPPED', 'Order shipped'),
-    ('COMPLETED', 'Order completed')
+    ('created', 'Order created'),
+    ('paid', 'Order paid'),
+    ('cancelled', 'Order cancelled'),
+    ('shipped', 'Order shipped'),
+    ('completed', 'Order completed')
 ON CONFLICT (status) DO NOTHING;
 
 -- TODO: Создать таблицу users
@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL DEFAULT '',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    -- Упрощенный regex без специальных символов
     CONSTRAINT email_format_check CHECK (
         email ~ '^[a-zA-Z0-9][a-zA-Z0-9._%-]*@[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$'
     )
@@ -89,10 +88,10 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 -- Если есть - RAISE EXCEPTION
 CREATE OR REPLACE FUNCTION check_order_not_already_paid() RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.status = 'PAID' THEN
+    IF NEW.status = 'paid' THEN
         IF EXISTS (
             SELECT 1 FROM order_status_history
-            WHERE order_id = NEW.id AND status = 'PAID'
+            WHERE order_id = NEW.id AND status = 'paid'
         ) THEN
             RAISE EXCEPTION 'Order % is already paid', NEW.id;
         END IF;
