@@ -191,7 +191,7 @@ class OrderRepository:
                 id,
                 user_id,
                 created_at,
-                status,  # Прямое значение статуса
+                status,
                 total_amount
             FROM orders
             WHERE id = :order_id
